@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 // Step- 01 (jwt)
 const jwt = require('jsonwebtoken');
@@ -51,7 +51,7 @@ async function run(){
             const query = {}
             const result = await productsCollection.find(query).toArray();
             res.send(result);
-        })
+        });
 
         // 
         app.get('/category/:name', async(req, res) => {
@@ -59,7 +59,14 @@ async function run(){
             const filter = {name}
             const result = await categoryCollection.find(filter).toArray();
             res.send(result);
-        })
+        });
+
+        app.get('/categories/:id', async(req, res) => {
+            const id = req.params.id;
+            const filter = {_id: ObjectId(id)}
+            const result = await categoryCollection.findOne(filter);
+            res.send(result);
+        });
     }
     finally{
 
