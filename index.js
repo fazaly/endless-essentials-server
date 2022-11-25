@@ -45,6 +45,8 @@ async function run(){
     try{
         const productsCollection = client.db('EndlessEssentials').collection('products');
         const categoryCollection = client.db('EndlessEssentials').collection('category');
+        const bookingsCollection = client.db('EndlessEssentials').collection('bookings');
+        const userCollection = client.db('EndlessEssentials').collection('users');
 
         // 
         app.get('/products', async(req, res) => {
@@ -61,11 +63,25 @@ async function run(){
             res.send(result);
         });
 
+
         app.get('/categories/:id', async(req, res) => {
             const id = req.params.id;
             const filter = {_id: ObjectId(id)}
             const result = await categoryCollection.findOne(filter);
             res.send(result);
+        });
+
+
+        app.post('/bookings', async (req, res) => {
+            const query = req.body
+            const result = await bookingsCollection.insertOne(query)
+            res.send(result)
+        });
+
+        app.post('/users', async (req, res) => {
+            const query = req.body
+            const result = await userCollection.insertOne(query)
+            res.send(result)
         });
     }
     finally{
