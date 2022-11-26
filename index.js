@@ -46,7 +46,21 @@ async function run(){
         const productsCollection = client.db('EndlessEssentials').collection('products');
         const categoryCollection = client.db('EndlessEssentials').collection('category');
         const bookingsCollection = client.db('EndlessEssentials').collection('bookings');
-        const userCollection = client.db('EndlessEssentials').collection('users');
+        const usersCollection = client.db('EndlessEssentials').collection('users');
+
+
+        // Note: make sure you use verifyAdmin after verifyJWT
+        const verifyAdmin = async(req, res, next ) => {
+            // console.log('inside verifyAdmin', req.decoded.email);
+            const decodedEmail = req.decoded.email;
+            const query = { email: decodedEmail };
+            const user = await usersCollection.findOne(query);
+
+            if (user?.role !== 'admin') {
+                return res.status(403).send({ message: 'forbidden access' })
+            }
+            next();
+        }
 
         // 
         app.get('/products', async(req, res) => {
@@ -80,9 +94,31 @@ async function run(){
 
         app.post('/users', async (req, res) => {
             const query = req.body
-            const result = await userCollection.insertOne(query)
-            res.send(result)
+            const result = await usersCollection.insertOne(query)
+            res.send(result);
         });
+
+
+        app.get('/users', async (req, res) => {
+            const query = {};
+            const users = await usersCollection.find(query).toArray();
+            res.send(users);
+        });
+
+        app.put('/users/admin/:id', async(req, res) => {
+             // Step- 17 (jwt)
+
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true };
+            const updatedDoc = {
+                $set: {
+                    role: 'admin'
+                }
+            }
+            const result = await usersCollection.updateOne(filter, updatedDoc, options);
+            res.send(result);
+        })
 
         app.get('/myorder', async (req, res) => {
             let query = {}
@@ -94,6 +130,8 @@ async function run(){
             const result = await bookingsCollection.find(query).toArray()
             res.send(result);
         });
+
+        
     }
     finally{
 
