@@ -52,6 +52,7 @@ async function run(){
         const usersCollection = client.db('EndlessEssentials').collection('users');
         const addProductsCollection = client.db('EndlessEssentials').collection('addProducts');
         const paymentsCollection = client.db('EndlessEssentials').collection('payments');
+        const advertiseCollection = client.db('EndlessEssentials').collection('advertise');
 
 
         // Note: make sure you use verifyAdmin after verifyJWT
@@ -153,6 +154,14 @@ async function run(){
             res.send(users);
         });
 
+        // User info from mongodb database
+        app.delete('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) }
+            const result = await usersCollection.deleteOne(filter);
+            res.send(result);
+        })
+
         app.get('/users/admin/:email', async (req, res) => {
             const email = req.params.email;
             console.log(email);
@@ -190,6 +199,44 @@ async function run(){
             const result = await addProductsCollection.insertOne(query)
             res.send(result)
         });
+
+        app.get('/myProducts', async (req, res) => {
+            let query = {}
+            if (req.query.email) {
+                query = {
+                    email: req.query.email
+                }
+            }
+            const result = await addProductsCollection.find(query).toArray()
+            res.send(result)
+        });
+
+        app.get('/myProducts/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) }
+            const result = await addProductsCollection.findOne(query)
+            res.send(result)
+        });
+
+        // Products info from mongodb database
+        app.delete('/myProducts/:id', async(req, res) => {
+            const id = req.params.id;
+            const filter = {_id: ObjectId(id)}
+            const result = await addProductsCollection.deleteOne(filter);
+            res.send(result);
+        });
+
+        app.post('/advertise', async (req, res) => {
+            const query = req.body;
+            const users = await advertiseCollection.insertOne(query)
+            res.send(users)
+        });
+
+        app.get('/advertise', async(req, res) => {
+            const query = {}
+            const advertise = await advertiseCollection.find(query).toArray();
+            res.send(advertise);
+        })
     }
     finally{
 
