@@ -89,6 +89,7 @@ async function run(){
             res.send(result)
         })
 
+        // read bookings from mongodb database
         app.get('/categories/:id', async(req, res) => {
             const id = req.params.id;
             const filter = {_id: ObjectId(id)}
